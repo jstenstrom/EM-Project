@@ -1,0 +1,356 @@
+---
+title: "EM-Project"
+author: "Jacob Stenstrom"
+date: '2024-02-13'
+output: html_document
+---
+
+```{r data-input}
+library(tidyverse)
+library(sandwich)
+library(lmtest)
+library(jtools)
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+library(estimatr)
+library(haven)
+library(ivreg)
+library(oaxaca)
+
+health_97<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/health-sample-data-97.csv')
+health_98<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/health-sample-data-98.csv')
+health_99<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/health-sample-data-99.csv')
+health_00<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/health-sample-data-00.csv')
+health_01<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/health-sample-data-01.csv')
+health_02<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/health-sample-data-02.csv')
+health_03<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/health-sample-data-03.csv')
+health_04<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/health-sample-data-04.csv')
+health_05<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/health-sample-data-05.csv')
+
+persons_97<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/person-data-97.csv')
+persons_98<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/person-data-98.csv')
+persons_99<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/person-data-99.csv')
+persons_00<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/person-data-00.csv')
+persons_01<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/person-data-01.csv')
+persons_02<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/person-data-02.csv')
+persons_03<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/person-data-03.csv')
+persons_04<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/person-data-04.csv')
+persons_05<-read.csv('C:/Users/jacob/Documents/EM-data/FINAL/person-data-05.csv')
+```
+
+```{r param-clean}
+param_list<-c('SRVY_YR','HHX','FMX','PX','ALC1YR','ALCLIFE'
+              ,'ALC12MNO','ALC12MTP','ALC12MWK','ALC12MYR','ALCAMT','ALC5UPNO','ALC5UPTP','ALC5UPYR'
+              ,'ALCSTAT1')
+
+#param_list2<-c('SRVY_YR','HHX','FMX','PX','ALC1YR','ALCLIFE'
+#              ,'ALC12MNO','ALC12MTP','ALC12MMO','ALC12MWK','ALC12MYR','ALCAMT','ALC5UPNO','ALC5UPTP','ALC5UPYR'
+#              ,'ALCSTAT1')
+
+#param_list3<-c('SRVY_YR','HHX','FMX','PX','ALC1YR','ALCLIFE'
+#              ,'ALC12MNO','ALC12MTP','ALC12MMO','ALC12MWK','ALC12MYR','ALCAMT','ALC5UPNO','ALC5UPTP','ALC5UPYR'
+#              ,'ALCSTAT1')
+
+#param_list4<-c('SRVY_YR','HHX','FMX','PX','ALC1YR','ALCLIFE'
+#              ,'ALC12MNO','ALC12MTP','ALC12MMO','ALC12MWK','ALC12MYR','ALCAMT','ALC5UPNO','ALC5UPTP','ALC5UPYR'
+#              ,'ALCSTAT1')
+
+param_list5<-c('SRVY_YR','HHX','FMX','FPX','ALC1YR','ALCLIFE'
+              ,'ALC12MNO','ALC12MTP','ALC12MWK','ALC12MYR','ALCAMT','ALC5UPNO','ALC5UPTP','ALC5UPYR'
+              ,'ALCSTAT')
+
+#param_list6<-c('SRVY_YR','HHX','FMX','FPX','ALC1YR','ALCLIFE'
+ #             ,'ALC12MNO','ALC12MTP','ALC12MWK','ALC12MYR','ALCAMT','ALC5UPNO','ALC5UPTP','ALC5UPYR'
+  #            ,'ALCSTAT')
+
+param_list_personal<-c('SRVY_YR','HHX','FMX','PX','AGE_P','SEX','DOB_M','DOINGLW','PHICOV','ORIGIN','EDUC'
+                       ,'RACEREC')
+
+param_list_personal2<-c('SRVY_YR','HHX','FMX','PX','AGE_P','SEX','DOB_M','DOINGLW','PHICOV','ORIGIN','EDUC'
+                        ,'RACERECR')
+
+param_list_personal3<-c('SRVY_YR','HHX','FMX','PX','AGE_P','SEX','DOB_M','DOINGLW','HIKINDN','ORIGIN_I','EDUC'
+                        ,'RACREC_I')
+
+param_list_personal31<-c('SRVY_YR','HHX','FMX','PX','AGE_P','SEX','DOB_M','DOINGLW1','HIKINDN',
+                         'ORIGIN_I','EDUC','RACREC_I')
+
+param_list_personal4<-c('SRVY_YR','HHX','FMX','PX','AGE_P','SEX','DOB_M','DOINGLW1','HIKINDN','ORIGIN_I','EDUC'
+                        ,'RACRECI2')
+
+param_list_personal5<-c('SRVY_YR','HHX','FMX','FPX','AGE_P','SEX','DOB_M','DOINGLWP',
+                        'HIKINDK','ORIGIN_I','EDUC1','RACRECI2')
+
+param_list_personal6<-c('SRVY_YR','HHX','FMX','FPX','AGE_P','SEX','DOB_M','DOINGLWP','HIKINDK','ORIGIN_I'
+                        ,'EDUC1','RACRECI2')
+
+#need additionally 'RACE','SEX','ORIGIN', for 2004
+#need additionally 'EDUC' for 2004 and 2005
+
+health_97_final<-health_97 %>% select(param_list)
+health_98_final<-health_98 %>% select(param_list)
+health_99_final<-health_99 %>% select(param_list)
+health_00_final<-health_00 %>% select(param_list)
+health_01_final<-health_01 %>% select(param_list)
+health_02_final<-health_02 %>% select(param_list)
+health_03_final<-health_03 %>% select(param_list)
+health_04_final<-health_04 %>% select(param_list5)
+health_05_final<-health_05 %>% select(param_list5)
+
+
+persons__97_final<-persons_97 %>% select(param_list_personal)
+persons__98_final<-persons_98 %>% select(param_list_personal)
+persons__99_final<-persons_99 %>% select(param_list_personal2)
+persons__00_final<-persons_00 %>% select(param_list_personal3)
+persons__01_final<-persons_01 %>% select(param_list_personal31)
+persons__02_final<-persons_02 %>% select(param_list_personal31)
+persons__03_final<-persons_03 %>% select(param_list_personal4)
+persons__04_final<-persons_04 %>% select(param_list_personal5)
+persons__05_final<-persons_05 %>% select(param_list_personal6)
+
+
+
+persons__97_final$id<-paste(persons__97_final$HHX,persons__97_final$FMX,persons__97_final$PX,sep='')
+persons__98_final$id<-paste(persons__98_final$HHX,persons__98_final$FMX,persons__98_final$PX,sep='')
+persons__99_final$id<-paste(persons__99_final$HHX,persons__99_final$FMX,persons__99_final$PX,sep='')
+persons__00_final$id<-paste(persons__00_final$HHX,persons__00_final$FMX,persons__00_final$PX,sep='')
+persons__01_final$id<-paste(persons__01_final$HHX,persons__01_final$FMX,persons__01_final$PX,sep='')
+persons__02_final$id<-paste(persons__02_final$HHX,persons__02_final$FMX,persons__02_final$PX,sep='')
+persons__03_final$id<-paste(persons__03_final$HHX,persons__03_final$FMX,persons__03_final$PX,sep='')
+persons__04_final$id<-paste(persons__04_final$HHX,persons__04_final$FMX,persons__04_final$FPX,sep='')
+persons__05_final$id<-paste(persons__05_final$HHX,persons__05_final$FMX,persons__05_final$FPX,sep='')
+
+
+health_97_final$id<-paste(health_97_final$HHX,health_97_final$FHX,health_97_final$PX,sep='')
+health_98_final$id<-paste(health_98_final$HHX,health_98_final$FHX,health_98_final$PX,sep='')
+health_99_final$id<-paste(health_99_final$HHX,health_99_final$FHX,health_99_final$PX,sep='')
+health_00_final$id<-paste(health_00_final$HHX,health_00_final$FHX,health_00_final$PX,sep='')
+health_01_final$id<-paste(health_01_final$HHX,health_01_final$FHX,health_01_final$PX,sep='')
+health_02_final$id<-paste(health_02_final$HHX,health_02_final$FHX,health_02_final$PX,sep='')
+health_03_final$id<-paste(health_03_final$HHX,health_03_final$FHX,health_03_final$PX,sep='')
+health_04_final$id<-paste(health_04_final$HHX,health_04_final$FHX,health_04_final$FPX,sep='')
+health_05_final$id<-paste(health_05_final$HHX,health_05_final$FHX,health_05_final$FPX,sep='')
+
+drop1<-c('HHX','FMX','PX')
+drop2<-c('HHX','FMX','FPX')
+persons__97_final<-persons__97_final[,!(names(persons__97_final)%in%drop1)]
+health_97_final<-health_97_final[,!(names(health_97_final)%in%drop1)]
+
+persons__98_final<-persons__98_final[,!(names(persons__98_final)%in%drop1)]
+health_98_final<-health_98_final[,!(names(health_98_final)%in%drop1)]
+
+persons__99_final<-persons__99_final[,!(names(persons__99_final)%in%drop1)]
+health_99_final<-health_99_final[,!(names(health_99_final)%in%drop1)]
+
+persons__00_final<-persons__00_final[,!(names(persons__00_final)%in%drop1)]
+health_00_final<-health_00_final[,!(names(health_00_final)%in%drop1)]
+
+persons__01_final<-persons__01_final[,!(names(persons__01_final)%in%drop1)]
+health_01_final<-health_01_final[,!(names(health_01_final)%in%drop1)]
+
+persons__02_final<-persons__02_final[,!(names(persons__02_final)%in%drop1)]
+health_02_final<-health_02_final[,!(names(health_02_final)%in%drop1)]
+
+persons__03_final<-persons__03_final[,!(names(persons__03_final)%in%drop1)]
+health_03_final<-health_03_final[,!(names(health_03_final)%in%drop1)]
+
+persons__04_final<-persons__04_final[,!(names(persons__04_final)%in%drop2)]
+health_04_final<-health_04_final[,!(names(health_04_final)%in%drop1)]
+
+persons__05_final<-persons__05_final[,!(names(persons__05_final)%in%drop2)]
+health_05_final<-health_05_final[,!(names(health_05_final)%in%drop1)]
+```
+
+```{r merge-files}
+data97<-merge(persons__97_final,health_97_final,by='id')
+data98<-merge(persons__98_final,health_98_final,by='id')
+data99<-merge(persons__99_final,health_99_final,by='id')
+data00<-merge(persons__00_final,health_00_final,by='id')
+data01<-merge(persons__01_final,health_01_final,by='id')
+data02<-merge(persons__02_final,health_02_final,by='id')
+data03<-merge(persons__03_final,health_03_final,by='id')
+data04<-merge(persons__04_final,health_04_final,by='id')
+data05<-merge(persons__05_final,health_05_final,by='id')
+```
+
+```{r create-vars-hisp}
+#df_list=list(data97,data98,data99,data00,data01,data02,data03,data04,data05)
+
+data97$hisp<-ifelse(data97$ORIGIN==1,1,0)
+data98$hisp<-ifelse(data98$ORIGIN==1,1,0)
+data99$hisp<-ifelse(data99$ORIGIN==1,1,0)
+data00$hisp<-ifelse(data00$ORIGIN_I==1,1,0)
+data01$hisp<-ifelse(data01$ORIGIN_I==1,1,0)
+data02$hisp<-ifelse(data02$ORIGIN_I==1,1,0)
+data03$hisp<-ifelse(data03$ORIGIN_I==1,1,0)
+data04$hisp<-ifelse(data04$ORIGIN_I==1,1,0)
+data05$hisp<-ifelse(data05$ORIGIN_I==1,1,0)
+```
+
+```{r create-vars-race}
+
+data97$white<-ifelse(data97$RACEREC==1,1,0)
+data98$white<-ifelse(data98$RACEREC==1,1,0)
+data99$white<-ifelse(data99$RACERECR==1,1,0)
+data00$white<-ifelse(data00$RACREC_I==1,1,0)
+data01$white<-ifelse(data01$RACREC_I==1,1,0)
+data02$white<-ifelse(data02$RACREC_I==1,1,0)
+data03$white<-ifelse(data03$RACRECI2==1,1,0)
+data04$white<-ifelse(data04$RACRECI2==1,1,0)
+data05$white<-ifelse(data05$RACRECI2==1,1,0)
+
+data97$black<-ifelse(data97$RACEREC==2,1,0)
+data98$black<-ifelse(data98$RACEREC==2,1,0)
+data99$black<-ifelse(data99$RACERECR==2,1,0)
+data00$black<-ifelse(data00$RACREC_I==2,1,0)
+data01$black<-ifelse(data01$RACREC_I==2,1,0)
+data02$black<-ifelse(data02$RACREC_I==2,1,0)
+data03$black<-ifelse(data03$RACRECI2==2,1,0)
+data04$black<-ifelse(data04$RACRECI2==2,1,0)
+data05$black<-ifelse(data05$RACRECI2==2,1,0)
+```
+
+```{r LFW}
+data97$employed<-ifelse(data97$DOINGLW==1,1,0)
+data98$employed<-ifelse(data98$DOINGLW==1,1,0)
+data99$employed<-ifelse(data99$DOINGLW==1,1,0)
+data00$employed<-ifelse(data00$DOINGLW==1,1,0)
+data01$employed<-ifelse(data01$DOINGLW1==1,1,0)
+data02$employed<-ifelse(data02$DOINGLW1==1,1,0)
+data03$employed<-ifelse(data03$DOINGLW1==1,1,0)
+data04$employed<-ifelse(data04$DOINGLWP==1,1,0)
+data05$employed<-ifelse(data05$DOINGLWP==1,1,0)
+
+data97$nw<-ifelse(data97$DOINGLW==3,1,0)
+data98$nw<-ifelse(data98$DOINGLW==3,1,0)
+data99$nw<-ifelse(data99$DOINGLW==3,1,0)
+data00$nw<-ifelse(data00$DOINGLW==3,1,0)
+data01$nw<-ifelse(data01$DOINGLW1==3,1,0)
+data02$nw<-ifelse(data02$DOINGLW1==3,1,0)
+data03$nw<-ifelse(data03$DOINGLW1==3,1,0)
+data04$nw<-ifelse(data04$DOINGLWP==3,1,0)
+data05$nw<-ifelse(data05$DOINGLWP==3,1,0)
+```
+
+```{r EDUC}
+data97$diploma<-ifelse(data97$EDUC==13,1,0)
+data98$diploma<-ifelse(data98$EDUC==13,1,0)
+data99$diploma<-ifelse(data99$EDUC==13,1,0)
+data00$diploma<-ifelse(data00$EDUC==13,1,0)
+data01$diploma<-ifelse(data01$EDUC==13,1,0)
+data02$diploma<-ifelse(data02$EDUC==13,1,0)
+data03$diploma<-ifelse(data03$EDUC==13,1,0)
+data04$diploma<-ifelse(data04$EDUC1==14,1,0)
+data05$diploma<-ifelse(data05$EDUC1==14,1,0)
+
+data97$nodiploma<-ifelse(data97$EDUC<13,1,0)
+data98$nodiploma<-ifelse(data98$EDUC<13,1,0)
+data99$nodiploma<-ifelse(data99$EDUC<13,1,0)
+data00$nodiploma<-ifelse(data00$EDUC<13,1,0)
+data01$nodiploma<-ifelse(data01$EDUC<13,1,0)
+data02$nodiploma<-ifelse(data02$EDUC<13,1,0)
+data03$nodiploma<-ifelse(data03$EDUC<13,1,0)
+data04$nodiploma<-ifelse(data04$EDUC1<13,1,0)
+data05$nodiploma<-ifelse(data05$EDUC1<13,1,0)
+```
+
+```{r insurance}
+data97$uninsured<-ifelse(data97$PHICOV==2,1,0)
+data98$uninsured<-ifelse(data98$PHICOV==2,1,0)
+data99$uninsured<-ifelse(data99$PHICOV==2,1,0)
+data00$uninsured<-ifelse(data00$HIKINDN==1,1,0)
+data01$uninsured<-ifelse(data01$HIKINDN==1,1,0)
+data02$uninsured<-ifelse(data02$HIKINDN==1,1,0)
+data03$uninsured<-ifelse(data03$HIKINDN==1,1,0)
+data04$uninsured<-ifelse(data04$HIKINDK==1,1,0)
+data05$uninsured<-ifelse(data05$HIKINDK==1,1,0)
+```
+
+
+```{r age}
+data97$age<-(data97$AGE_P-21)
+data98$age<-(data98$AGE_P-21)
+data99$age<-(data99$AGE_P-21)
+data00$age<-(data00$AGE_P-21)
+data01$age<-(data01$AGE_P-21)
+data02$age<-(data02$AGE_P-21)
+data03$age<-(data03$AGE_P-21)
+data04$age<-(data04$AGE_P-21)
+data05$age<-(data05$AGE_P-21)
+
+
+data97$age2<-(data97$age^2)
+data98$age2<-(data98$age^2)
+data99$age2<-(data99$age^2)
+data00$age2<-(data00$age^2)
+data01$age2<-(data01$age^2)
+data02$age2<-(data02$age^2)
+data03$age2<-(data03$age^2)
+data04$age2<-(data04$age^2)
+data05$age2<-(data05$age^2)
+```
+
+```{r sex}
+data97$male<-ifelse(data97$SEX==1,1,0)
+data98$male<-ifelse(data98$SEX==1,1,0)
+data99$male<-ifelse(data99$SEX==1,1,0)
+data00$male<-ifelse(data00$SEX==1,1,0)
+data01$male<-ifelse(data01$SEX==1,1,0)
+data02$male<-ifelse(data02$SEX==1,1,0)
+data03$male<-ifelse(data03$SEX==1,1,0)
+data04$male<-ifelse(data04$SEX==1,1,0)
+data05$male<-ifelse(data05$SEX==1,1,0)
+```
+
+```{r over21}
+data97$over21<-ifelse(data97$age>-1,1,0)
+data98$over21<-ifelse(data98$age>-1,1,0)
+data99$over21<-ifelse(data99$age>-1,1,0)
+data00$over21<-ifelse(data00$age>-1,1,0)
+data01$over21<-ifelse(data01$age>-1,1,0)
+data02$over21<-ifelse(data02$age>-1,1,0)
+data03$over21<-ifelse(data03$age>-1,1,0)
+data04$over21<-ifelse(data04$age>-1,1,0)
+data05$over21<-ifelse(data05$age>-1,1,0)
+```
+
+```{r 21st-bday}
+data97$over21<-ifelse(data97$age>-1,1,0)
+data98$over21<-ifelse(data98$age>-1,1,0)
+data99$over21<-ifelse(data99$age>-1,1,0)
+data00$over21<-ifelse(data00$age>-1,1,0)
+data01$over21<-ifelse(data01$age>-1,1,0)
+data02$over21<-ifelse(data02$age>-1,1,0)
+data03$over21<-ifelse(data03$age>-1,1,0)
+data04$over21<-ifelse(data04$age>-1,1,0)
+data05$over21<-ifelse(data05$age>-1,1,0)
+```
+
+```{r merg2}
+data04<-data04 %>% rename('ALCSTAT1'='ALCSTAT')
+data05<-data05 %>% rename('ALCSTAT1'='ALCSTAT')
+
+param_final<-c('id','hisp','white','black','employed','nw','diploma','nodiploma','uninsured','age'
+              ,'age','age2','male','over21','ALC1YR','ALCLIFE'
+              ,'ALC12MNO','ALC12MTP','ALC12MWK','ALC12MYR','ALCAMT','ALC5UPNO','ALC5UPTP','ALC5UPYR'
+              ,'ALCSTAT1')
+
+data97<-data97[,(names(data97)%in%param_final)]
+data98<-data98[,(names(data98)%in%param_final)]
+data99<-data99[,(names(data99)%in%param_final)]
+data00<-data00[,(names(data00)%in%param_final)]
+data01<-data01[,(names(data01)%in%param_final)]
+data02<-data02[,(names(data02)%in%param_final)]
+data03<-data03[,(names(data03)%in%param_final)]
+data04<-data04[,(names(data04)%in%param_final)]
+data05<-data05[,(names(data05)%in%param_final)]
+
+df_list=list(data97,data98,data99,data00,data01,data02,data03,data04,data05)
+data_final<-bind_rows(df_list)
+```
+
+
+```{r output}
+write.csv(data_final,'C:\\Users\\jacob\\Documents\\EM-data\\EM-Project-DATA-FINAL.csv',row.names = FALSE)
+```
