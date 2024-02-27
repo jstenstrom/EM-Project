@@ -65,25 +65,25 @@ param_list5<-c('SRVY_YR','HHX','FMX','FPX','ALC1YR','ALCLIFE'
   #            ,'ALCSTAT')
 
 param_list_personal<-c('SRVY_YR','HHX','FMX','PX','AGE_P','SEX','DOB_M','DOINGLW','PHICOV','ORIGIN','EDUC'
-                       ,'RACEREC')
+                       ,'RACEREC','REGION')
 
 param_list_personal2<-c('SRVY_YR','HHX','FMX','PX','AGE_P','SEX','DOB_M','DOINGLW','PHICOV','ORIGIN','EDUC'
-                        ,'RACERECR')
+                        ,'RACERECR','REGION')
 
 param_list_personal3<-c('SRVY_YR','HHX','FMX','PX','AGE_P','SEX','DOB_M','DOINGLW','HIKINDN','ORIGIN_I','EDUC'
-                        ,'RACREC_I')
+                        ,'RACREC_I','REGION')
 
 param_list_personal31<-c('SRVY_YR','HHX','FMX','PX','AGE_P','SEX','DOB_M','DOINGLW1','HIKINDN',
-                         'ORIGIN_I','EDUC','RACREC_I')
+                         'ORIGIN_I','EDUC','RACREC_I','REGION')
 
 param_list_personal4<-c('SRVY_YR','HHX','FMX','PX','AGE_P','SEX','DOB_M','DOINGLW1','HIKINDN','ORIGIN_I','EDUC'
-                        ,'RACRECI2')
+                        ,'RACRECI2','REGION')
 
 param_list_personal5<-c('SRVY_YR','HHX','FMX','FPX','AGE_P','SEX','DOB_M','DOINGLWP',
                         'HIKINDK','ORIGIN_I','EDUC1','RACRECI2')
 
 param_list_personal6<-c('SRVY_YR','HHX','FMX','FPX','AGE_P','SEX','DOB_M','DOINGLWP','HIKINDK','ORIGIN_I'
-                        ,'EDUC1','RACRECI2')
+                        ,'EDUC1','RACRECI2','REGION')
 
 #need additionally 'RACE','SEX','ORIGIN', for 2004
 #need additionally 'EDUC' for 2004 and 2005
@@ -234,15 +234,15 @@ data05$nw<-ifelse(data05$DOINGLWP==3,1,0)
 ```
 
 ```{r EDUC}
-data97$diploma<-ifelse(data97$EDUC==13,1,0)
-data98$diploma<-ifelse(data98$EDUC==13,1,0)
-data99$diploma<-ifelse(data99$EDUC==13,1,0)
-data00$diploma<-ifelse(data00$EDUC==13,1,0)
-data01$diploma<-ifelse(data01$EDUC==13,1,0)
-data02$diploma<-ifelse(data02$EDUC==13,1,0)
-data03$diploma<-ifelse(data03$EDUC==13,1,0)
-data04$diploma<-ifelse(data04$EDUC1==14,1,0)
-data05$diploma<-ifelse(data05$EDUC1==14,1,0)
+data97$diploma<-ifelse(data97$EDUC>=13&data97$EDUC<90,1,0)
+data98$diploma<-ifelse(data98$EDUC>=13&data98$EDUC<90,1,0)
+data99$diploma<-ifelse(data99$EDUC>=13&data99$EDUC<90,1,0)
+data00$diploma<-ifelse(data00$EDUC>=13&data00$EDUC<90,1,0)
+data01$diploma<-ifelse(data01$EDUC>=13&data01$EDUC<90,1,0)
+data02$diploma<-ifelse(data02$EDUC>=13&data02$EDUC<90,1,0)
+data03$diploma<-ifelse(data03$EDUC>=13&data03$EDUC<90,1,0)
+data04$diploma<-ifelse(data04$EDUC1>=13&data04$EDUC<90,1,0)
+data05$diploma<-ifelse(data05$EDUC1>=13&data05$EDUC<90,1,0)
 
 data97$nodiploma<-ifelse(data97$EDUC<13,1,0)
 data98$nodiploma<-ifelse(data98$EDUC<13,1,0)
@@ -327,14 +327,56 @@ data04$over21<-ifelse(data04$age>-1,1,0)
 data05$over21<-ifelse(data05$age>-1,1,0)
 ```
 
+```{r region}
+data97$northw<-ifelse(data97$REGION=1,1,0)
+data98$northw<-ifelse(data98$REGION=1,1,0)
+data99$northw<-ifelse(data99$REGION=1,1,0)
+data00$northw<-ifelse(data00$REGION=1,1,0)
+data01$northw<-ifelse(data01$REGION=1,1,0)
+data02$northw<-ifelse(data02$REGION=1,1,0)
+data03$northw<-ifelse(data03$REGION=1,1,0)
+data04$northw<-ifelse(data04$REGION=1,1,0)
+data05$northw<-ifelse(data05$REGION=1,1,0)
+
+data97$midw<-ifelse(data97$REGION=2,1,0)
+data98$midw<-ifelse(data98$REGION=2,1,0)
+data99$midw<-ifelse(data99$REGION=2,1,0)
+data00$midw<-ifelse(data00$REGION=2,1,0)
+data01$midw<-ifelse(data01$REGION=2,1,0)
+data02$midw<-ifelse(data02$REGION=2,1,0)
+data03$midw<-ifelse(data03$REGION=2,1,0)
+data04$midw<-ifelse(data04$REGION=2,1,0)
+data05$midw<-ifelse(data05$REGION=2,1,0)
+
+data97$south<-ifelse(data97$REGION=3,1,0)
+data98$south<-ifelse(data98$REGION=3,1,0)
+data99$south<-ifelse(data99$REGION=3,1,0)
+data00$south<-ifelse(data00$REGION=3,1,0)
+data01$south<-ifelse(data01$REGION=3,1,0)
+data02$south<-ifelse(data02$REGION=3,1,0)
+data03$south<-ifelse(data03$REGION=3,1,0)
+data04$south<-ifelse(data04$REGION=3,1,0)
+data05$south<-ifelse(data05$REGION=3,1,0)
+
+data97$west<-ifelse(data97$REGION=4,1,0)
+data98$west<-ifelse(data98$REGION=4,1,0)
+data99$west<-ifelse(data99$REGION=4,1,0)
+data00$west<-ifelse(data00$REGION=4,1,0)
+data01$west<-ifelse(data01$REGION=4,1,0)
+data02$west<-ifelse(data02$REGION=4,1,0)
+data03$west<-ifelse(data03$REGION=4,1,0)
+data04$west<-ifelse(data04$REGION=4,1,0)
+data05$west<-ifelse(data05$REGION=4,1,0)
+```
+
 ```{r merg2}
 data04<-data04 %>% rename('ALCSTAT1'='ALCSTAT')
 data05<-data05 %>% rename('ALCSTAT1'='ALCSTAT')
 
-param_final<-c('id','hisp','white','black','employed','nw','diploma','nodiploma','uninsured','age'
+param_final<-c('SRVY_YR','id','hisp','white','black','employed','nw','diploma','nodiploma','uninsured','age'
               ,'age','age2','male','over21','ALC1YR','ALCLIFE'
               ,'ALC12MNO','ALC12MTP','ALC12MWK','ALC12MYR','ALCAMT','ALC5UPNO','ALC5UPTP','ALC5UPYR'
-              ,'ALCSTAT1')
+              ,'ALCSTAT1','northw','midw','south','west')
 
 data97<-data97[,(names(data97)%in%param_final)]
 data98<-data98[,(names(data98)%in%param_final)]
