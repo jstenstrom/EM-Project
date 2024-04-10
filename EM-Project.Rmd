@@ -180,6 +180,17 @@ data02<-merge(persons__02_final,health_02_final,by='id')
 data03<-merge(persons__03_final,health_03_final,by='id')
 data04<-merge(persons__04_final,health_04_final,by='id')
 data05<-merge(persons__05_final,health_05_final,by='id')
+
+data97$SRVY_YR=1997
+data98$SRVY_YR=1998
+data99$SRVY_YR=1999
+data00$SRVY_YR=2000
+data01$SRVY_YR=2001
+data02$SRVY_YR=2002
+data03$SRVY_YR=2003
+data04$SRVY_YR=2004
+data05$SRVY_YR=2005
+
 ```
 
 ```{r create-vars-hisp}
@@ -400,7 +411,16 @@ df_list=list(data97,data98,data99,data00,data01,data02,data03,data04,data05)
 data_final<-bind_rows(df_list)
 ```
 
+```{r extension}
+hos_dat<-read.csv('C:/Users/jacob/Documents/EM-data/hospital_per_cap.csv')
+
+data_final$hos=0
+data_final$hos<-ifelse(data_final$northw==1,hos_dat[1,4],
+                       ifelse(data_final$midw==1,hos_dat[2,4],
+                              ifelse(data_final$south==1,hos_dat[3,4],hos_dat[4,4])))
+```
 
 ```{r output}
 write.csv(data_final,'C:\\Users\\jacob\\Documents\\EM-data\\EM-Project-DATA-FINAL.csv',row.names = FALSE)
 ```
+
