@@ -418,6 +418,14 @@ data_final$hos=0
 data_final$hos<-ifelse(data_final$northw==1,hos_dat[1,4],
                        ifelse(data_final$midw==1,hos_dat[2,4],
                               ifelse(data_final$south==1,hos_dat[3,4],hos_dat[4,4])))
+
+hos_dat_04<-read.csv('C:/Users/jacob/Documents/EM-data/hospital_per_cap_04.csv')
+
+data_final$hos_04=0
+data_final$hos_04<-ifelse(data_final$northw==1,hos_dat_04[1,4],
+                       ifelse(data_final$midw==1,hos_dat_04[2,4],
+                              ifelse(data_final$south==1,hos_dat_04[3,4],hos_dat_04[4,4])))
+
 ```
 
 ```{r output}
